@@ -7,7 +7,7 @@ __pycache__/
 # C extensions
 *.so
 *env
-.doclify/
+.codescribe/
 
 # Distribution / packaging
 .Python

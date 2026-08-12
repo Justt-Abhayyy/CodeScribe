@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from doclify.utils.logger import get_logger
+from CodeScribe.utils.logger import get_logger
 
 # Initialize the logger
 logger = get_logger(__name__)

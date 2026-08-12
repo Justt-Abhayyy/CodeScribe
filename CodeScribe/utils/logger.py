@@ -7,7 +7,7 @@ from pathlib import Path
 _current_date = datetime.now().strftime("%Y-%m-%d")
 _current_timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
-LOG_DIR = Path(".doclify") / "logs" / _current_date
+LOG_DIR = Path(".codescribe") / "logs" / _current_date
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 LOG_FILE = LOG_DIR / f"{_current_timestamp}.log"
 
@@ -34,8 +34,8 @@ def get_logger(name: str = __name__) -> logging.Logger:
         console_handler.setLevel(logging.WARNING)
         console_handler.setFormatter(formatter)
 
-        # Instead of root_logger, we use 'doclify' to capture our project's logs only
-        project_logger = logging.getLogger("doclify")
+        # Instead of root_logger, we use 'codescribe' to capture our project's logs only
+        project_logger = logging.getLogger("codescribe")
         project_logger.setLevel(logging.DEBUG)
         project_logger.addHandler(file_handler)
         project_logger.addHandler(console_handler)

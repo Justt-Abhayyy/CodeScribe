@@ -1,304 +1,721 @@
 <div align="center">
-  <h1><a href="https://pypi.org/project/doclify/">Doclify</a></h1>
-  <p><i>A hands-on exploration of advanced context engineering — built as an open source AI agent for documentation.</i></p>
 
-  [![PyPI Version](https://img.shields.io/pypi/v/doclify?style=flat&color=blue)](https://pypi.org/project/doclify/)
-  [![PyPI Downloads](https://img.shields.io/pypi/dm/doclify?style=flat&color=blue)](https://pypi.org/project/doclify/)
-  [![GitHub Stars](https://img.shields.io/github/stars/KalyanM45/Doclify?style=flat&color=ffd700)](https://github.com/KalyanM45/Doclify/stargazers)
-  [![GitHub Issues](https://img.shields.io/github/issues/KalyanM45/Doclify?style=flat&color=red)](https://github.com/KalyanM45/Doclify/issues)
-  [![GitHub Forks](https://img.shields.io/github/forks/KalyanM45/Doclify?style=flat&color=green)](https://github.com/KalyanM45/Doclify/network/members)
-  [![GitHub Discussions](https://img.shields.io/github/discussions/KalyanM45/Doclify?style=flat&color=purple)](https://github.com/KalyanM45/Doclify/discussions)
-  [![GitHub License](https://img.shields.io/github/license/KalyanM45/Doclify?style=flat&color=blue)](https://github.com/KalyanM45/Doclify/blob/main/LICENSE)
+# <a href="https://github.com/Justt-Abhayyy/CodeScribe">CodeScribe</a>
+
+### AI-Powered Codebase Documentation Agent
+
+<p>
+  <i>Understand your codebase, build structured context, and automatically generate professional documentation.</i>
+</p>
+
+<br>
+
+[![GitHub Stars](https://img.shields.io/github/stars/Justt-Abhayyy/CodeScribe?style=flat\&color=ffd700)](https://github.com/Justt-Abhayyy/CodeScribe/stargazers)
+[![GitHub Issues](https://img.shields.io/github/issues/Justt-Abhayyy/CodeScribe?style=flat\&color=red)](https://github.com/Justt-Abhayyy/CodeScribe/issues)
+[![GitHub Forks](https://img.shields.io/github/forks/Justt-Abhayyy/CodeScribe?style=flat\&color=green)](https://github.com/Justt-Abhayyy/CodeScribe/network/members)
+[![GitHub License](https://img.shields.io/github/license/Justt-Abhayyy/CodeScribe?style=flat\&color=blue)](https://github.com/Justt-Abhayyy/CodeScribe/blob/main/LICENSE)
+
 </div>
 
 ---
 
-**Doclify** is an AI agent that documents your software projects. It scans your codebase, builds structured context for each file using a multi-stage agentic pipeline, and generates a comprehensive, professional `README.md` — all from the command line.
+## 🚀 What is CodeScribe?
 
-But the tool itself is secondary. The real purpose of this project is described below.
+**CodeScribe** is an AI-powered developer tool that analyzes software repositories and automatically generates clear, structured, and professional project documentation.
 
----
+Instead of manually reading hundreds or thousands of lines of source code to understand a project, CodeScribe scans the repository, builds structured context for individual files, compresses that information into meaningful summaries, and uses those summaries to generate a comprehensive `README.md`.
 
-## 🧠 Why This Project Exists — Advanced Context Engineering
+The project is designed around a simple idea:
 
-This project is a **deliberate, hands-on laboratory for learning and practising advanced context engineering for AI agents**.
+> **Better context produces better AI output.**
 
-The core inspiration comes from **Dex Horthy** (founder of [HumanLayer](https://humanlayer.dev)) and his write-up on **[Advanced Context Engineering for Coding Agents](https://github.com/humanlayer/advanced-context-engineering-for-coding-agents/blob/main/ace-fca.md)** — one of the most concrete, practitioner-level treatments of what it actually takes to make AI agents work in real production codebases, not just toy examples.
-
-> *"The contents of your context window are the ONLY lever you have to affect the quality of your output."*
-> — Dex Horthy, HumanLayer
-
-The thesis is direct: **AI agent failures in complex codebases are almost never model failures. They are context failures.** The agent hallucinated because a crucial fact was missing. It chose the wrong approach because it received ambiguous information. It produced low-quality output because it had no reference for what "good" looks like in this specific domain.
-
-Picking a smarter model does not fix this. Structuring better context does.
-
-Doclify is built as a real, non-trivial environment for testing, breaking, and improving context engineering techniques — with open source feedback loops that private experiments cannot replicate.
+CodeScribe therefore focuses not only on documentation generation, but also on **context engineering for AI agents**.
 
 ---
 
-## 📖 The ACE Framework — What Dex Horthy's Research Actually Says
+## 🧠 Why CodeScribe?
 
-Read the full piece here: **[Advanced Context Engineering for Coding Agents](https://github.com/humanlayer/advanced-context-engineering-for-coding-agents/blob/main/ace-fca.md)**
+Large software projects can contain hundreds of files, dependencies, configuration files, utilities, services, and interconnected components.
 
-Below is a detailed breakdown of the core principles and how Doclify's agentic pipeline is built around each of them.
+Giving an AI model the entire repository at once can result in:
 
----
+* Excessive context usage
+* Missing important information
+* Irrelevant information overwhelming useful information
+* Hallucinated project details
+* Poorly structured documentation
+* Expensive and inefficient inference
 
-### 1. LLMs Are Stateless Functions — Input Quality Is Everything
+CodeScribe approaches the problem differently.
 
-The 12-factor agents framework makes this point explicitly: LLMs have no persistent state. Every inference call starts from zero. The only thing that changes between a good result and a bad result — without retraining the model — is the quality of the input you construct.
+Instead of asking an AI model to understand the entire repository in one pass, it breaks the problem into smaller, focused stages.
 
-This is not a minor observation. It reframes the entire problem. Asking "how do I get a better AI agent?" becomes the same question as "how do I build better inputs?"
-
-**How Doclify applies this:**
-
-Doclify treats every stage of its pipeline as an input construction problem. The two prompts in `prompts/batch_summary.txt` and `prompts/final_summary.txt` are not convenience wrappers — they are the primary engineering artefacts. The model is a fixed function; the input is what we control and optimise.
-
----
-
-### 2. Frequent Intentional Compaction (FIC)
-
-This is the central technique from the ACE document. The core idea: as an AI agent works through a complex problem, its context window fills with noisy intermediate state — file search results, tool call outputs, build logs, dead ends, partial reasoning. If you let this accumulate, the quality of the agent's output degrades. The agent starts to lose the thread.
-
-**Intentional compaction** means pausing at strategic points and asking the agent to distil everything it has learned into a structured, compact document — capturing the end goal, the approach taken, what has been completed, and what the current blocker is. Then starting a fresh context window from that compact document rather than from the full noisy history.
-
-Dex's recommended cadence: keep context window utilisation in the **40–60% range**. Never let the window fill. Compact before you need to.
-
-The hierarchy of what makes a context window bad, in order of severity:
-
-| Priority | Problem | Why It's Worse |
-|----------|---------|----------------|
-| 1 (worst) | Incorrect information | Agent makes confident wrong decisions |
-| 2 | Missing information | Agent hallucinates to fill the gap |
-| 3 | Too much noise | Agent loses signal, degrades on complex reasoning |
-
-**How Doclify applies this:**
-
-The two-stage pipeline is intentional compaction in code. Stage 1 forces each file through a compression step — a 500-line source file becomes 3–4 sentences of dense, structured signal. That summary is cached. Stage 2 assembles only the summaries (not the raw files) as input to the final agent call. The raw code never touches the final context window.
-
-The cache in `.doclify/cache.json` is the compaction artefact. It stores the already-distilled state so the agent can resume from a clean, compact foundation on subsequent runs rather than re-processing everything from scratch.
-
----
-
-### 3. Research → Plan → Implement
-
-Dex's workflow splits agentic work into three distinct phases, each with a deliberately separate context window:
-
-**Research** — the agent's only job is to understand the codebase: find relevant files, trace information flow, identify where the relevant logic lives. The output is a structured research document. Nothing is changed.
-
-**Plan** — using the research document as input (not the raw codebase), the agent produces a step-by-step implementation plan: exact files to edit, precise testing strategy, verification steps per phase. The output is a plan document. Still nothing is changed.
-
-**Implement** — the agent executes the plan phase by phase. After each verified phase, the current status is compacted back into the plan document before proceeding. Only this phase requires a working branch.
-
-The key insight: **a bad line in the research document can produce thousands of bad lines of code**. A bad line in the plan can produce hundreds. A bad line of code is just a bad line of code. Human review effort should be concentrated at the highest-leverage point — research and planning — not at the code review stage after the damage is already done.
-
-> *"I can't read 2000 lines of Go daily. But I can read 200 lines of a well-written implementation plan."*
-> — Dex Horthy
-
-**How Doclify applies this:**
-
-`doclify init` is the research phase — the agent scans the repository, identifies all relevant files, and compiles its findings into `doclify.yaml`. No inference happens here; this is pure discovery.
-
-`doclify run` is the plan-and-implement phase — it reads the structured output of init, processes each file in sequence, and builds toward the final README.
-
-`doclify update <path>` is targeted re-planning — when a specific file changes, only that slice of the plan is invalidated and recomputed. The rest of the cached context remains valid.
-
----
-
-### 4. Subagents for Context Isolation
-
-From the ACE document: subagents are not about role-playing. They are a **context management tool**. When an agent needs to search a codebase, understand a dependency, or summarise a file, that discovery process generates a large volume of noisy intermediate output. If the parent agent does this work itself, that noise pollutes its context window for the rest of the task.
-
-The solution: delegate discovery tasks to a subagent with a fresh context window. The subagent does the noisy work, distils the result into a compact summary, and returns only the summary to the parent. The parent's context window stays clean.
-
-**How Doclify applies this:**
-
-Each file summary call in the pipeline is effectively a subagent invocation — a fresh, bounded inference call whose only job is to distil one file into a dense paragraph. The parent pipeline never sees the raw file content again after handing it to the summariser. It only receives the compacted output.
-
-This is why the two-stage architecture exists. A single-shot "summarise the entire codebase at once" approach would be both token-expensive and context-polluting. The subagent-per-file pattern keeps each call bounded and focused.
-
----
-
-### 5. Specs Are the New Code — Prompts as Source Artefacts
-
-Sean Grove's framing from AI Engineer 2025, cited in the ACE document: developers who vibe-code for two hours, discard their prompts, and commit only the final output are doing the equivalent of a Java developer committing a compiled JAR while throwing away the source.
-
-**The prompt is the source. The generated output is the compiled artefact.**
-
-This means prompts deserve the same rigour as code — version control, peer review, iteration, and documentation of why specific constraints exist.
-
-**How Doclify applies this:**
-
-The two prompt files in `doclify/prompts/` are version-controlled and treated as the primary engineering artefacts of the project. Every constraint in those prompts — negative examples ("do not write X"), explicit delimiters, output format rules — exists because removing it produced measurably worse output. The prompts have a changelog, not just the Python code.
-
-When a generated README is poor quality, the first question is not "which model should we use?" — it is "what is missing or incorrect in the prompt that caused this context failure?"
-
----
-
-### 6. Mental Alignment — The Hidden Cost of High-Volume AI Output
-
-The ACE document identifies an underappreciated problem with productive AI agents: as code volume increases dramatically, a larger proportion of the codebase becomes unfamiliar to every engineer at any given time. Mental alignment — everyone on the team understanding how the code is changing and why — starts to break down.
-
-Code review was designed to solve this. But it was designed for human-pace code production. At AI-agent pace (2000-line PRs every few days), code review can no longer carry the full mental-alignment load. The artefacts that maintain alignment need to move upstream — into research documents and implementation plans that engineers can actually read and evaluate before the code is written.
-
-**How Doclify applies this:**
-
-Documentation generated by Doclify is itself a mental alignment artefact. A well-structured README keeps the entire team oriented to what the project is, how it is structured, and how the key components relate. When the README is generated by an agent with good context, it is a side effect of the agent genuinely understanding the codebase — not a description of file names.
-
-The quality of the README is a proxy for the quality of the agent's context. If the README is vague, the context was vague.
-
----
-
-## 🎯 What Doclify Is Really Practising
-
-| Context Engineering Concept | How Doclify Implements It |
-|-----------------------------|---------------------------|
-| Stateless LLM — input is everything | Prompts treated as primary engineering artefacts, not boilerplate |
-| Frequent Intentional Compaction | Two-stage pipeline: raw files → dense summaries → final synthesis |
-| Compaction artefact persistence | `cache.json` stores distilled state; runs resume from compact context |
-| Subagent context isolation | Per-file summariser calls keep raw content out of the synthesis context window |
-| Research → Plan → Implement | `init` (discover) → `run` (synthesise) → `update` (selective replan) |
-| Minimise context window utilisation | Each inference call is bounded; raw files never enter the final context |
-| Prompts as source code | `prompts/` are version-controlled; constraints are documented and reviewed |
-| High-leverage human review | Every generated README is a reviewable artefact; failures trace back to prompt gaps |
-
----
-
-## 🚀 Getting Started
-
-### 1. Installation
-
-```bash
-pip install doclify
+```text
+                    ┌─────────────────┐
+                    │   Source Code   │
+                    └────────┬────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │ Repository Scan │
+                    └────────┬────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │ File Summaries  │
+                    └────────┬────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │ Context Cache   │
+                    └────────┬────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │ Final Synthesis │
+                    └────────┬────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │   README.md     │
+                    └─────────────────┘
 ```
 
-### 2. Configure Your API Key
+---
 
-Doclify runs its agentic pipeline against a fast LLM inference API. Set your API key as an environment variable or place it in a `.env` file at your project root.
+# 🔬 Context Engineering
 
-| Platform | Command |
-| :--- | :--- |
-| **Windows (CMD)** | `set GROQ_API_KEY=your_api_key_here` |
-| **Windows (PS)** | `$env:GROQ_API_KEY="your_api_key_here"` |
-| **Linux / macOS** | `export GROQ_API_KEY=your_api_key_here` |
-| **.env File** | `GROQ_API_KEY=your_api_key_here` |
+One of the main goals of CodeScribe is to explore practical techniques for building reliable AI agents that operate on real-world codebases.
 
-*(Get a free API key at [console.groq.com](https://console.groq.com/))*
+The project is inspired by research and practical discussions around **advanced context engineering for coding agents**.
+
+The central principle is straightforward:
+
+> **The quality of the context provided to an AI system strongly influences the quality of its output.**
+
+CodeScribe applies this principle throughout its documentation pipeline.
 
 ---
 
-## 📖 CLI Reference
+## 1. Stateless LLMs — Input Quality Matters
 
-Doclify exposes four commands that map directly to the Research → Plan → Implement workflow.
+Large language models do not automatically retain knowledge about an entire repository.
 
-### `doclify init` — Research Phase
+Every inference call depends heavily on the information supplied to it.
 
-Scan the repository and build the context manifest.
+CodeScribe therefore treats each stage of the pipeline as a **context construction problem**.
 
-- Walks your project folder respecting all `.gitignore` rules
-- Produces `doclify.yaml` — the structured list of files the agent will process
-- Creates `.doclify/` for cache and log storage
-- Safe to re-run: updates the file manifest while preserving your model configuration
+Instead of sending an entire repository to one model call, the system creates focused inputs for each stage.
 
-```bash
-doclify init
+### CodeScribe approach
+
+```text
+Raw Source Code
+      ↓
+Focused File Context
+      ↓
+Dense File Summary
+      ↓
+Structured Project Context
+      ↓
+Final Documentation
 ```
 
-Run this first whenever you start documenting a new project, or when the project structure has changed significantly.
-
-### `doclify models` — Discover Available Models
-
-List all AI models available to the agent.
-
-- Fetches a real-time table of available models with context window sizes and output limits
-- Use this to select a model appropriate for your codebase size
-
-```bash
-doclify models
-```
-
-### `doclify set default <model_id>` — Configure the Agent
-
-Set the default model for all future pipeline runs.
-
-```bash
-doclify set default llama-3.3-70b-versatile
-```
-
-This updates `doclify.yaml`. You can override it per-run with `--model`.
-
-### `doclify run` — Plan and Implement Phase
-
-Execute the full agentic documentation pipeline.
-
-- Reads the file manifest from `doclify.yaml`
-- Runs Stage 1: each file is processed by a bounded summariser agent → dense summary cached to `.doclify/cache.json`
-- Runs Stage 2: all summaries are assembled into the final context window → README synthesised
-- Backs up any existing `README.md` before overwriting
-
-```bash
-doclify run
-```
-
-Override the model for a single run without changing config:
-
-```bash
-doclify run --model qwen/qwen3-32b
-```
-
-### `doclify update <path>` — Selective Context Refresh
-
-Recompute only the cache entries that are stale, then optionally regenerate the README.
-
-- Targeted update: invalidates and recomputes the summary for a specific file or directory
-- Full regeneration from existing cache: use `.` as the path
-
-```bash
-# Update a specific file's summary in the cache
-doclify update src/database/connection.py
-
-# Regenerate README from the current cache without re-running all summaries
-doclify update .
-```
-
-This is the selective context refresh operation — the equivalent of re-running only the relevant slice of the compaction pipeline.
+This allows each inference step to work with information that is relevant to its specific task.
 
 ---
 
-## ⚙️ Configuration (`doclify.yaml`)
+## 2. Frequent Intentional Compaction
+
+As an AI system works with a large codebase, the amount of intermediate information can grow quickly.
+
+Too much information can reduce the quality of the final result.
+
+CodeScribe addresses this through **intentional context compaction**.
+
+A large source file can be transformed into a short, information-dense summary.
+
+For example:
+
+```text
+500 lines of source code
+          ↓
+3–4 sentences of structured information
+```
+
+The resulting summary can then be reused instead of repeatedly sending the original source code into later inference stages.
+
+This reduces context usage while preserving important information about the project.
+
+---
+
+## 3. Research → Plan → Implement
+
+CodeScribe follows a staged workflow inspired by agentic software-engineering patterns.
+
+### Research
+
+The system first discovers the repository structure and identifies the files that need to be processed.
+
+```text
+Repository
+    ↓
+File discovery
+    ↓
+Project manifest
+```
+
+### Process
+
+Individual files are processed independently and converted into structured summaries.
+
+```text
+Source File
+    ↓
+AI summarization
+    ↓
+Structured summary
+```
+
+### Synthesis
+
+The collected summaries are combined and supplied to the final documentation stage.
+
+```text
+File summaries
+      ↓
+Project context
+      ↓
+AI synthesis
+      ↓
+README.md
+```
+
+Separating these stages prevents the final generation step from being overwhelmed by raw source code.
+
+---
+
+## 4. Context Isolation
+
+CodeScribe processes individual files through bounded AI inference steps.
+
+Each file can be understood independently before its information is passed into the larger documentation pipeline.
+
+This provides several advantages:
+
+* Smaller context windows
+* Focused inference
+* Reduced noise
+* Better scalability
+* Easier debugging
+* Reusable intermediate summaries
+
+Rather than asking one AI call to understand an entire repository, CodeScribe distributes the understanding process across multiple focused stages.
+
+---
+
+## 5. Prompts as Engineering Artifacts
+
+AI prompts are an important part of CodeScribe's architecture.
+
+The prompts define:
+
+* What information the model should extract
+* What information should be ignored
+* How summaries should be structured
+* How project context should be represented
+* How the final README should be generated
+
+This means prompts should be treated similarly to source code:
+
+```text
+Prompt
+  ↓
+Model Input
+  ↓
+Generated Output
+```
+
+A poor prompt can produce poor documentation even when the underlying model is capable.
+
+CodeScribe therefore keeps its prompts version-controlled and treats them as an important part of the system.
+
+---
+
+# 🎯 Core Architecture
+
+CodeScribe uses a multi-stage documentation pipeline.
+
+| Stage              | Responsibility                                |
+| ------------------ | --------------------------------------------- |
+| Repository Scanner | Discovers project files                       |
+| Context Manifest   | Defines files to process                      |
+| File Processor     | Extracts relevant source information          |
+| AI Summarizer      | Generates compact file summaries              |
+| Context Cache      | Stores processed information                  |
+| Final Synthesizer  | Combines summaries into project documentation |
+| README Generator   | Produces the final `README.md`                |
+
+---
+
+# 📊 Context Engineering Principles
+
+| Principle                   | CodeScribe Implementation                                      |
+| --------------------------- | -------------------------------------------------------------- |
+| Input quality matters       | Structured context is created before every AI call             |
+| Intentional compaction      | Raw files are converted into dense summaries                   |
+| Persistent context          | Processed summaries are cached                                 |
+| Context isolation           | Individual files are processed through bounded inference calls |
+| Staged processing           | Repository discovery → summarization → synthesis               |
+| Minimize context usage      | Raw source is not unnecessarily passed to final generation     |
+| Prompts as source artifacts | Prompt files are version-controlled                            |
+| Reviewable output           | Generated documentation can be inspected and refined           |
+
+---
+
+# 🚀 Getting Started
+
+## Prerequisites
+
+Before installing CodeScribe, make sure you have:
+
+* Python installed
+* Git installed
+* A supported LLM API key
+* A project you want to document
+
+---
+
+## 1. Clone the Repository
+
+```bash
+git clone https://github.com/Justt-Abhayyy/CodeScribe.git
+cd CodeScribe
+```
+
+---
+
+## 2. Install Dependencies
+
+If you are using `pip`:
+
+```bash
+pip install -e .
+```
+
+If you are using `uv`:
+
+```bash
+uv sync
+```
+
+---
+
+## 3. Configure Your API Key
+
+CodeScribe requires an LLM API key to run its AI documentation pipeline.
+
+### Windows PowerShell
+
+```powershell
+$env:GROQ_API_KEY="your_api_key_here"
+```
+
+### Windows CMD
+
+```cmd
+set GROQ_API_KEY=your_api_key_here
+```
+
+### Linux / macOS
+
+```bash
+export GROQ_API_KEY="your_api_key_here"
+```
+
+You can also place the key in a `.env` file if supported by your configuration.
+
+**Never commit API keys or `.env` files containing secrets to GitHub.**
+
+---
+
+# 📖 CLI Usage
+
+CodeScribe provides commands for initializing a project, configuring the AI model, running the documentation pipeline, and refreshing individual pieces of project context.
+
+---
+
+## `codescribe init`
+
+### Initialize a project
+
+Scans the repository and creates the project context manifest.
+
+```bash
+codescribe init
+```
+
+The initialization process:
+
+* Scans the project directory
+* Respects `.gitignore` rules
+* Identifies files that should be processed
+* Creates the project manifest
+* Prepares cache and logging infrastructure
+* Preserves existing model configuration
+
+Run this command when starting CodeScribe on a new project or when the project structure changes significantly.
+
+---
+
+## `codescribe models`
+
+### Discover available models
+
+```bash
+codescribe models
+```
+
+This command can be used to discover available AI models and their relevant context and output limits.
+
+Choose a model based on the size and complexity of your project.
+
+---
+
+## `codescribe set default`
+
+### Configure the default model
+
+```bash
+codescribe set default llama-3.3-70b-versatile
+```
+
+This sets the model used for future CodeScribe runs.
+
+---
+
+## `codescribe run`
+
+### Generate project documentation
+
+```bash
+codescribe run
+```
+
+The command executes the complete documentation pipeline.
+
+### Stage 1 — File Processing
+
+Each relevant source file is processed individually.
+
+```text
+Source File
+     ↓
+AI Analysis
+     ↓
+Dense Summary
+     ↓
+Cache
+```
+
+### Stage 2 — Documentation Synthesis
+
+The cached summaries are combined into a structured project context.
+
+```text
+Cached Summaries
+       ↓
+Project Context
+       ↓
+AI Synthesis
+       ↓
+README.md
+```
+
+---
+
+## Override the Model
+
+You can specify a model for an individual run:
+
+```bash
+codescribe run --model qwen/qwen3-32b
+```
+
+This allows you to experiment with different models without permanently changing your configuration.
+
+---
+
+# 🔄 Updating Project Context
+
+When a project changes, you do not necessarily need to process the entire repository again.
+
+CodeScribe supports targeted context updates.
+
+### Update a specific file
+
+```bash
+codescribe update src/database/connection.py
+```
+
+This invalidates and recomputes the relevant cached information.
+
+### Regenerate from existing context
+
+```bash
+codescribe update .
+```
+
+This can regenerate the documentation using the current cached project context without unnecessarily reprocessing every file.
+
+---
+
+# ⚙️ Configuration
+
+CodeScribe uses a project configuration file to describe the project and its processing configuration.
+
+Example:
 
 ```yaml
 project: My Awesome Project
+
 structure:
   - src/main.py
   - src/utils/helpers.py
+
 llm:
   model: llama-3.3-70b-versatile
 ```
 
-The `structure` list is the agent's context manifest — the explicit, curated set of files that will be processed. Keeping this list intentional (rather than letting the agent process every file blindly) is itself a context engineering decision: what does the agent actually need to understand this codebase, and what is noise?
+The `structure` section acts as the project's **context manifest**.
 
-Re-run `doclify init` to update the manifest when the project structure changes. Existing model configuration is preserved.
-
----
-
-## 💬 Feedback, Issues, and Discussions
-
-- **Found a bug?** Open an issue with your `doclify.yaml`, the command you ran, and the terminal output.
-- **Generated README was wrong or off-tone?** That is a context engineering failure worth diagnosing. Share the output in [Discussions](https://github.com/KalyanM45/Doclify/discussions) — it helps improve the pipeline for everyone.
-- **Ideas or experiments?** The [Discussions](https://github.com/KalyanM45/Doclify/discussions) tab is the right place. What context engineering techniques have you tried? What changed the output quality?
+Instead of blindly processing every file, CodeScribe can use an explicit set of files that are relevant to understanding the project.
 
 ---
 
-## 🤝 Contributing & License
+# 🗂️ Project Structure
 
-Contributions make this a better learning environment. If you want to contribute, the most valuable areas are:
+A typical CodeScribe project contains components similar to:
 
-- **Prompt engineering** — if the README output was vague or off, the root cause is almost always in `prompts/`. Open an issue with the output and let's diagnose the context failure together.
-- **Context pipeline experiments** — cross-file context injection, retrieval-augmented summarisation, structured intermediate outputs, subagent strategies.
-- **Reliability improvements** — retry logic, atomic cache writes, async parallel summarisation.
-- **New language support** — extending the agent beyond Python to JavaScript, Go, Rust, and other ecosystems.
+```text
+CodeScribe/
+│
+├── .github/
+│   └── workflows/
+│
+├── CodeScribe/
+│   ├── components/
+│   ├── config/
+│   ├── pipelines/
+│   ├── prompts/
+│   ├── resources/
+│   ├── schema/
+│   └── utils/
+│
+├── main.py
+├── pyproject.toml
+├── uv.lock
+├── README.md
+├── LICENSE
+└── .gitignore
+```
 
-Please open an issue before starting large changes so we can align on direction first. Feel free to fork, branch, and submit Pull Requests.
+The internal structure may evolve as CodeScribe develops.
 
-This project is licensed under the **GNU AGPLv3 License**. See the [LICENSE](LICENSE) file for details.
+---
+
+# 💡 Example Workflow
+
+Suppose you have a project:
+
+```text
+MyProject/
+├── src/
+├── tests/
+├── config/
+├── requirements.txt
+└── README.md
+```
+
+Run:
+
+```bash
+codescribe init
+```
+
+Then:
+
+```bash
+codescribe run
+```
+
+CodeScribe analyzes the project and produces documentation based on the information it extracts.
+
+Conceptually:
+
+```text
+MyProject
+    │
+    ├── Source files
+    ├── Configuration
+    ├── Utilities
+    └── Dependencies
+            │
+            ▼
+      CodeScribe Scanner
+            │
+            ▼
+      File-level Analysis
+            │
+            ▼
+      Context Cache
+            │
+            ▼
+      Project Synthesis
+            │
+            ▼
+        README.md
+```
+
+---
+
+# ✨ Key Features
+
+### 🤖 AI-Powered Analysis
+
+Uses LLM inference to understand source code and generate meaningful project documentation.
+
+### 🧩 Multi-Stage Processing
+
+Breaks documentation generation into smaller, focused processing stages.
+
+### 🧠 Context Engineering
+
+Designed around structured context construction rather than simply sending an entire repository to an AI model.
+
+### ⚡ Efficient Processing
+
+Caches intermediate summaries so previously processed information can be reused.
+
+### 🔄 Selective Updates
+
+Allows specific files or directories to be refreshed without rebuilding the entire context.
+
+### 📝 Automatic README Generation
+
+Produces a structured project README based on the AI's understanding of the repository.
+
+### 🛠️ CLI-Based Workflow
+
+Designed to work directly from the command line and integrate naturally with developer workflows.
+
+---
+
+# 🧪 Experiments & Future Improvements
+
+Potential areas for extending CodeScribe include:
+
+* Cross-file dependency analysis
+* Retrieval-augmented documentation generation
+* Parallel file summarization
+* Improved cache invalidation
+* Multi-language support
+* Documentation templates
+* Architecture diagram generation
+* API documentation generation
+* Code dependency graphs
+* Better error recovery and retry handling
+* Local LLM support
+* Documentation quality evaluation
+* Automated documentation updates through CI/CD
+
+---
+
+# 🤝 Contributing
+
+Contributions and experiments are welcome.
+
+Some useful areas for contribution include:
+
+### Prompt Engineering
+
+Improve the quality and reliability of generated documentation.
+
+### Context Pipeline
+
+Experiment with:
+
+* Cross-file context
+* Retrieval
+* Structured intermediate representations
+* Context compression
+* Agent isolation
+
+### Reliability
+
+Potential improvements include:
+
+* Retry mechanisms
+* Atomic cache updates
+* Better error handling
+* Parallel processing
+* Improved logging
+
+### Language Support
+
+Extend CodeScribe beyond Python to ecosystems such as:
+
+* JavaScript
+* TypeScript
+* Java
+* Go
+* Rust
+* C++
+* C#
+
+---
+
+# 🐛 Issues & Feedback
+
+Found a bug or generated documentation that does not accurately represent your project?
+
+Open an issue:
+
+👉 https://github.com/Justt-Abhayyy/CodeScribe/issues
+
+When reporting an issue, include:
+
+* The command you executed
+* Relevant configuration
+* Terminal output
+* The generated documentation
+* The expected behavior
+
+This makes it easier to reproduce and diagnose problems.
+
+---
+
+# 📜 License
+
+CodeScribe is distributed under the **GNU AGPLv3 License**.
+
+See the [`LICENSE`](LICENSE) file for details.
+
+---
+
+# ⭐ Support the Project
+
+If CodeScribe is useful to you, consider giving the repository a ⭐ on GitHub.
+
+**Repository:**
+https://github.com/Justt-Abhayyy/CodeScribe
+
+---
+
+<div align="center">
+
+### CodeScribe
+
+**Turn codebases into understandable documentation.**
+
+</div>

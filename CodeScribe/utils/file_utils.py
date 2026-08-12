@@ -2,12 +2,12 @@ import os
 import json
 import subprocess
 from pathlib import Path
-from doclify.utils.logger import get_logger
+from CodeScribe.utils.logger import get_logger
 
 # Initialize the logger
 logger = get_logger(__name__)
 
-CACHE_DIR = Path(".doclify")
+CACHE_DIR = Path(".codescribe")
 CACHE_FILE = CACHE_DIR / "cache.json"
 
 def load_cache():

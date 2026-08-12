@@ -4,9 +4,9 @@ import os
 from pathlib import Path
 from rich.console import Console
 from typing import Optional
-from doclify.utils.llm import generate_doc
-from doclify.utils.logger import get_logger
-from doclify.schema.schema import LLMConfig, ReadmeResponse
+from CodeScribe.utils.llm import generate_doc
+from CodeScribe.utils.logger import get_logger
+from CodeScribe.schema.schema import LLMConfig, ReadmeResponse
 
 # Initialize logger and console
 logger = get_logger(__name__)
@@ -62,7 +62,7 @@ def generate_readme_file(cache, config, llm_config: Optional[LLMConfig] = None, 
             final_readme = "# Project Documentation\n\nNo summaries available."
 
         # Creating a directory for created READMEs
-        version_dir = Path(".doclify/generated_artifacts/")
+        version_dir = Path(".codescribe/generated_artifacts/")
         version_dir.mkdir(parents=True, exist_ok=True) # Ensure parents created
         artifact_path = version_dir / f"README-{time.strftime('%Y%m%d%H%M%S')}.md"
         artifact_path.write_text(final_readme, encoding="utf-8")

@@ -1,13 +1,7 @@
-import json
-import os
-import re
-from typing import Optional, Any, Union, Dict, List
-from groq import Groq
-
-from doclify.utils.utils import get_prompt
-from doclify.utils.logger import get_logger
-from doclify.schema.schema import LLMConfig
-from doclify.config.constants import LiteLLMConfig
+from CodeScribe.utils.utils import get_prompt
+from CodeScribe.utils.logger import get_logger
+from CodeScribe.schema.schema import LLMConfig
+from CodeScribe.config.constants import LiteLLMConfig
 
 logger = get_logger(__name__)
 
